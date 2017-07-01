@@ -69,18 +69,18 @@ class Graph
         return ret
     end
 
-    def dfg(v, visited)
+    def dfs(v, visited)
         visited[v] = true
         for i in (0...@num_vertices)
             unless visited[i] || adj_matrix[v][i].nil?
-                visited = dfg(i, visited)
+                visited = dfs(i, visited)
             end
         end
         return visited
     end
 
     def connected?
-        dfg(0, Array.new(@num_vertices, false)).each do |t|
+        dfs(0, Array.new(@num_vertices, false)).each do |t|
             return false unless t
         end
         return true
