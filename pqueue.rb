@@ -1,10 +1,10 @@
 class Element
     include Comparable
 
-    attr_accessor :value, :key
+    attr_accessor :node, :key
 
-    def initialize(value, key)
-        @value, @key = value, key
+    def initialize(node, key)
+        @node, @key = node, key
     end
 
     def <=>(other)
@@ -26,9 +26,10 @@ end
 
 class Pqueue
     def initialize(arr = [])
-        @array = []
         @map = []
-        @index = 0
+        @heap = []
+        @index = 0 # place to insert new element
+
         arr.each_with_index do |k, n|
             insert(n, k)
         end
@@ -37,57 +38,58 @@ class Pqueue
     def min
         return nil if @index.zero?
 
-        ret = @array[0]
+        ret = @heap[0]
         @index -= 1
-        @array[0] = @array[@index]
-        @map[ret.value] = nil
-        @array[@index] = nil
+        @map[ret.node] = nil
+        @map[@heap[@index].node] = 0
+        @heap[0] = @heap[@index]
+        @heap[@index] = nil
         min_heapify(0)
-        return ret.value
+        return ret.node
     end
 
     def insert(n, k)
-        @array[@index] = Element.new(n, nil)
         @map[n] = @index
+        @heap[@index] = Element.new(n, nil)
         decrease_key(@index, k)
         @index += 1
         return nil
     end
 
     private def min_heapify(i)
+        return false unless i < @index
+
         l = 2 * i + 1
         r = 2 * i + 2
         min = i
-        if l < @index && @array[l] < @array[i]
+        if l < @index && @heap[l] < @heap[min]
             min = l
         end
-        if r < @index && @array[r] < @array[min]
+        if r < @index && @heap[r] < @heap[min]
             min = r
         end
 
         if min != i
-            @map[@array[i].value], @map[@array[min].value] = min, i
-            @array[i], @array[min] = @array[min], @array[i]
+            @map[@heap[i].node], @map[@heap[min].node] = min, i
+            @heap[i], @heap[min] = @heap[min], @heap[i]
             min_heapify(min)
         end
+        return true
     end
 
     def update(n, k)
         return decrease_key(@map[n], k)
     end
 
-    def decrease_key(i, k)
-        if !@array[i].key.nil? && @array[i].key < k
-            return false
-        end
+    private def decrease_key(i, k)
+        return false if !@heap[i].key.nil? && @heap[i].key < k
 
-        @array[i].key = k
-
-        while i > 0 && @array[(i-1)/2] > @array[i]
-            pi = (i-1)/2
-            @map[@array[i].value], @map[@array[pi].value] = pi, i
-            @array[i], @array[pi] = @array[pi], @array[i]
-            i = pi
+        @heap[i].key = k
+        while i > 0 && @heap[(i-1)/2] > @heap[i]
+            p = (i-1)/2
+            @map[@heap[i].node], @map[@heap[p].node] = p, i
+            @heap[i], @heap[p] = @heap[p], @heap[i]
+            i = p
         end
         return true
     end
