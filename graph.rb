@@ -111,9 +111,13 @@ class Graph
         end
         
         ret = ""
+        weight = 0
         (mst.drop 1).each do |e|
-            ret << "(#{e[0]+1}, #{e[1]+1}, #{adj_matrix[e[0]][e[1]]})\n"
+            s, d = e
+            weight += adj_matrix[s][d]
+            ret << "(#{s+1}, #{d+1}, #{adj_matrix[s][d]})\n"
         end
+        ret << "#{weight}\n"
 
         return ret
     end
